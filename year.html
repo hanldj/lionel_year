@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>年份換算器</title>
+  <style>
+    body {
+      font-family: "Arial", sans-serif;
+      padding: 20px;
+    }
+    input, select, button {
+      font-size: 16px;
+      padding: 8px;
+      margin: 5px 0;
+    }
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <h2>年份換算與生肖查詢</h2>
+
+  <label for="type">選擇輸入類型：</label>
+  <select id="type" onchange="toggleJapaneseInput()">
+    <option value="gregorian">西元 / 公元</option>
+    <option value="roc">民國</option>
+    <option value="japanese">日本和曆</option>
+  </select><br>
+
+  <div id="inputArea">
+    <label for="yearInput">輸入年份：</label><br>
+    <input type="text" id="yearInput" placeholder="例如：2024 或 113">
+  </div>
+
+  <div id="japaneseArea" style="display:none;">
+    <label for="eraSelect">選擇日本年號：</label>
+    <select id="eraSelect" onchange="updateJapaneseHint()">
+      <option value="令和">令和</option>
+      <option value="平成">平成</option>
+      <option value="昭和">昭和</option>
+      <option value="大正">大正</option>
+      <option value="明治">明治</option>
+    </select>
+    <br>
+    <label for="japaneseYear">輸入該年號下的年份：</label><br>
+    <input type="number" id="japaneseYear" min="1">
+    <span id="yearHint" style="color: gray; font-size: 14px;"></span>
+  </div>
+
+  <button onclick="convert()">換算</button>
+
+  <div id="result"></div>
+
+  <script>
+    const zodiac = ["鼠", "牛", "虎", "兔", "龍", "蛇", "馬", "羊", "猴", "雞", "狗", "豬"];
+    const japaneseEraMap = [
+      { name: "令和", start: 2019, max: new Date().getFullYear() - 2019 + 1 },
+      { name: "平成", start: 1989, max: 31 },
+      { name: "昭和", start: 1926, max: 64 },
+      { name: "大正", start: 1912, max: 15 },
+      { name: "明治", start: 1868, max: 45 }
+    ];
+
+    function toggleJapaneseInput() {
+      const type = document.getElementById("type").value;
+      document.getElementById("inputArea").style.display = (type === "japanese") ? "none" : "block";
+      document.getElementById("japaneseArea").style.display = (type === "japanese") ? "block" : "none";
+      if (type === "japanese") updateJapaneseHint();
+    }
+
+    function updateJapaneseHint() {
+      const eraName = document.getElementById("eraSelect").value;
+      const era = japaneseEraMap.find(e => e.name === eraName);
+      const yearInput = document.getElementById("japaneseYear");
+      document.getElementById("yearHint").textContent = `（最多可輸入 ${era.max} 年）`;
+      yearInput.max = era.max;
+    }
+
+    function convert() {
+      const type = document.getElementById("type").value;
+      let year = null;
+
+      if (type === "gregorian") {
+        year = parseInt(document.getElementById("yearInput").value);
+      } else if (type === "roc") {
+        year = parseInt(document.getElementById("yearInput").value) + 1911;
+      } else if (type === "japanese") {
+        const eraName = document.getElementById("eraSelect").value;
+        const eraYear = parseInt(document.getElementById("japaneseYear").value);
+        const era = japaneseEraMap.find(e => e.name === eraName);
+
+        if (!eraYear || isNaN(eraYear) || eraYear < 1 || eraYear > era.max) {
+          document.getElementById("result").textContent = `請輸入有效的 ${era.name} 年份（1-${era.max}）`;
+          return;
+        }
+
+        year = era.start + eraYear - 1;
+      }
+
+      if (!year || isNaN(year) || year < 1) {
+        document.getElementById("result").textContent = "請輸入有效年份。";
+        return;
+      }
+
+      const roc = year - 1911;
+      const rocStr = roc >= 1 ? `民國 ${roc} 年` : "（尚未建國）";
+      const zodiacSign = zodiac[(year - 4) % 12];
+
+      let jpName = "（無對應）";
+      for (const era of japaneseEraMap) {
+        if (year >= era.start) {
+          const num = year - era.start + 1;
+          if (num <= era.max) {
+            jpName = `${era.name}${num} 年`;
+            break;
+          }
+        }
+      }
+
+      document.getElementById("result").innerHTML = `
+        ✅ 西元：${year} 年<br>
+        🇹🇼 ${rocStr}<br>
+        🇯🇵 日本和曆：${jpName}<br>
+        🐾 十二生肖：${zodiacSign}
+      `;
+    }
+  </script>
+</body>
+</html>
