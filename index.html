@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>Lionel的年份換算器</title>
+  <title>年份換算器</title>
   <style>
     body {
       font-family: "Arial", sans-serif;
@@ -21,7 +21,7 @@
   </style>
 </head>
 <body>
-  <h2>Lionel幫你換算年份、查生肖</h2>
+  <h2>年份換算與生肖查詢</h2>
 
   <label for="type">選擇輸入類型：</label>
   <select id="type" onchange="toggleJapaneseInput()">
@@ -120,8 +120,10 @@
         }
       }
 
+      let lionelNote = (year === 2013) ? " [Lionel出生年 !!!]" : "";
+
       document.getElementById("result").innerHTML = `
-        ✅ 西元：${year} 年<br>
+        ✅ 西元：${year} 年${lionelNote}<br>
         🇹🇼 ${rocStr}<br>
         🇯🇵 日本和曆：${jpName}<br>
         🐾 十二生肖：${zodiacSign}
